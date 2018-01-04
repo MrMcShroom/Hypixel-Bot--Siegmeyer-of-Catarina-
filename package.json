@@ -14,11 +14,10 @@
     "fs": "0.0.1-security",
     "goo.gl": "^0.1.4",
     "googleapis-plus": "^0.8.3",
-    "hypixel": "^1.0.1",
     "mojang-api": "0.0.2",
     "request": "^2.81.0",
     "simple-short": "^1.0.7",
     "url": "^0.11.0",
-    "valid-url": "^1.0.9",
+    "valid-url": "^1.0.9"
   }
 }
