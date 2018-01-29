@@ -1,0 +1,18 @@
+{
+    "token": "discord bot token id",
+    "ownerID": "discord developer id",
+    "response": {
+        "ayy": "lmao",
+        "ping": "pong!",
+        "pocketsand": "POCKET SAND!!! https://media.giphy.com/media/i2GADdaJIscPS/giphy.gif",
+        "ash": "ketchum",
+        "shroom": "shroom is gay",
+        "cash": "cash me ousside"
+    },
+    "hypixelkey": "hypixel api key",
+    "botname": "Siegmeyer of Catarina#9720",
+    "mcuuid": "ur minecraft uuid",
+    "embedcolor": "0xFF6347",
+	"prefix": "!",
+    "urlshortapikey": "googl shortener api key"
+}

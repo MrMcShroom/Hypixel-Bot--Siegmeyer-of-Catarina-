@@ -137,7 +137,7 @@ function getPercentageToNextLevel(exp) {
     return (exp - x0) / (getTotalExpToLevel(lv + 1) - x0);
 }
 //xp - getTotalExpToLevel(ILeveling.getLevel(XP))
-function rank(rank, purchasedrank, uuid, oldrank) {
+function rank(rank, purchasedrank, uuid, oldrank, monthly) {
     if (uuid === "9429fd48459b439c9dfacda578c9f393" && uuid === config.mcuuid) { //this just defines MrMcShroom as the bot creator and host, if he is running the bot
         return "Stats Bot Creator & Host"
     }
@@ -148,7 +148,10 @@ function rank(rank, purchasedrank, uuid, oldrank) {
         return "Hypixel Stats Bot Creator"
     } else if (uuid === config.mcuuid) {
         return "Hypixel Stats Bot Host" //if you set your ID as config.mcuuid, this will define you as the bot host
-    } else {
+    } else if (monthly === "SUPERSTAR"){
+        return "MVP++ <3";
+    }
+     else {
         switch (rank) {
             case "YOUTUBER":
                 return "Youtuber";
@@ -227,11 +230,9 @@ function rank(rank, purchasedrank, uuid, oldrank) {
                                 return "MVP";
                                 break;
                             case undefined:
-                                console.log("Poop1");
                                 return "Non-Donator";
                                 break;
                         }
-                        console.log("Poop");
                         return "Non-Donator";
                         break;
                     case "MVP_PLUS":
@@ -252,9 +253,8 @@ function rank(rank, purchasedrank, uuid, oldrank) {
     }
 }
 
-function getrankcolor(latestpackage, rank, pluscolor, uuid, oldrank) { // function to turn rank into 0xFFFFFF color format, mvp being aqua, vip and vip plus being green, undefined being gray and MVP + being the color of the plus, and youtube being yellow
+function getrankcolor(latestpackage, rank, pluscolor, uuid, oldrank,monthly) { // function to turn rank into 0xFFFFFF color format, mvp being aqua, vip and vip plus being green, undefined being gray and MVP + being the color of the plus, and youtube being yellow
     if (uuid === config.mcuuid) {
-        console.log(config.embedcolor);
         return config.embedcolor;
     } else {
         if (uuid === 'c53454db59db4c508cdca9afaf547873') {
@@ -265,6 +265,15 @@ function getrankcolor(latestpackage, rank, pluscolor, uuid, oldrank) { // functi
         }
         if (uuid === 'dd55aff75e584d068bf1691b5d08cb58') {
             return '0xBF00FF';
+        }
+        if (uuid === 'faceafe71d93480ea747171d4690eebe') {
+            return '0x660066';
+        }
+        if (uuid === '8d26e9b2398b4680aa045ae0d92c127a') {
+            return '0x3333ff';
+        }
+        if (monthly === "SUPERSTAR") {
+            return '0xFFAA00';
         }
         if (rank === "YOUTUBER") {
             return '0xFFAA00';
@@ -309,57 +318,40 @@ function getrankcolor(latestpackage, rank, pluscolor, uuid, oldrank) { // functi
         } else {
             if (latestpackage === "MVP_PLUS" || oldrank === 'MVP_PLUS' && pluscolor) {
                 if (pluscolor === 'BLACK') {
-                    console.log('0x000000');
                     return '0x000000';
                 } else if (pluscolor === 'DARK_BLUE') {
-                    console.log('0x0000AA');
                     return '0x0000AA';
                 } else if (pluscolor === 'DARK_GREEN') {
-                    console.log('0x00AA00');
                     return '0x00AA00';
                 } else if (pluscolor === 'DARK_AQUA') {
-                    console.log('0x00AAAA');
                     return '0x00AAAA';
                 } else if (pluscolor === 'DARK_RED') {
-                    console.log('0xAA0000');
                     return '0xAA0000';
                 } else if (pluscolor === 'DARK_PURPLE') {
-                    console.log('0xAA00AA');
                     return '0xAA00AA';
                 } else if (pluscolor === 'GOLD') {
-                    console.log('0xFFAA00');
                     return '0xFFAA00';
                 } else if (pluscolor === 'GRAY') {
-                    console.log('0xAAAAAA');
                     return '0xAAAAAA';
                 } else if (pluscolor === 'DARK_GRAY') {
-                    console.log('0x555555');
                     return '0x555555';
                 } else if (pluscolor === 'BLUE') {
-                    console.log('0x5555FF');
                     return '0x5555FF';
                 } else if (pluscolor === 'GREEN') {
-                    console.log('0x55FF55');
                     return '0x55FF55';
                 } else if (pluscolor === 'AQUA') {
-                    console.log('0x55FFFF');
                     return '0x55FFFF';
                 } else if (pluscolor === 'RED') {
-                    console.log('0xFF5555');
                     return '0xFF5555';
                 } else if (pluscolor === 'LIGHT_PURPLE') {
-                    console.log('0xFF55FF');
                     return '0xFF55FF';
                 } else if (pluscolor === 'YELLOW') {
-                    console.log('0xFFFF55');
                     return '0xFFFF55';
                 } else if (pluscolor === 'WHITE') {
-                    console.log('0xFFFFFF');
                     return '0xFFFFFF';
 
                 }
             } else if (latestpackage === 'VIP_PLUS' || oldrank === 'VIP_PLUS') {
-                console.log("Shimminy mic jim jims!")
                 return "0x55FF55";
             } else if (latestpackage === 'VIP' || oldrank === 'VIP') {
                 return "0x55FF55";
@@ -374,7 +366,7 @@ function getrankcolor(latestpackage, rank, pluscolor, uuid, oldrank) { // functi
     }
 }
 
-function getBedwarsLevel(exp) {
+function getBedwarsLevel(exp) { // DOES NOT WORK FOR ANYONE ABOVE LEVEL 100, TRY bedwars_level value from API!!!!!!!
     // first few levels are different
     if (exp < 500) {
         return 0;
@@ -424,6 +416,29 @@ function validateUUID(input) {
 }
 
 
+
+function parkourTime(data) {
+    try {
+var time = Math.min(...data.map(value => value.timeTook)) / 1000;
+var minutes = Math.floor(time / 60);
+var seconds = time - minutes * 60;
+minutes = minutes.toFixed(2);
+seconds = seconds.toFixed(2);
+if (minutes > 1) {
+    return minutes + " minutes and " + seconds + "seconds.";
+} else if (minutes === 1) {
+    return minutes + " minute and " + seconds + " seconds.";
+} else {
+    return seconds + " seconds."
+}
+
+} catch(e) { return "This user has not completed the parkour!";
+}
+
+}
+
+
+
 module.exports = {
     getTrueLevel,
     getLevel,
@@ -436,5 +451,6 @@ module.exports = {
     rank,
     getrankcolor,
     validatePlayer,
-    validateUUID
+    validateUUID,
+    parkourTime
     };
