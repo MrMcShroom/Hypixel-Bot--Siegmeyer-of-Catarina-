@@ -38,7 +38,7 @@ Eric Engel II
 ## Licensing 
 
 This bot is licensed under the MIT license.
-Copyright (c) <year> <copyright holders>
+Copyright (c) 2018 Eric Engel II
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
