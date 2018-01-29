@@ -1,5 +1,5 @@
 # Hypixel-Bot--Siegmeyer-of-Catarina-
-The discord bot for Hypixel and PB2, created by MrMcShroom
+The discord bot for Hypixel and PB2, created by Eric Engel II
 
 ## Getting Started
 
