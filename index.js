@@ -12,29 +12,66 @@ const sql = require("sqlite");
 sql.open("./db/data.sqlite");
 
 client.login(config.token);
-let chicken = true;
-function status(chicken) {
-    if (chicken) {
-        client.user.setGame('!help');
-        chicken = false;
-    } else {
-        client.user.setGame('Serving ' + client.guilds.size + "Different servers!");
-        chicken = true;
-    }
-}
+process.on('unhandledRejection', error => console.error(`Uncaught Promise Rejection:\n${error}`));
 
 fs.readdir("./events/", (err, files) => {
     if (err) return console.error(err);
 files.forEach(file => {
     let eventFunction = require(`./events/${file}`);
 let eventName = file.split(".")[0];
-// super-secret recipe to call events with all their proper arguments *after* the `client` var.
 client.on(eventName, (...args) => eventFunction.run(client, ...args));
 });
 });
+async function reporterror(therror,content,discrim) {
+    let botowner = await client.fetchUser(config.ownerID);
+        botowner.send("Error: ```" + therror + "``` + Message: ```" + content + "```" + "Sent by: ```" + discrim + "```");
+    }
+async function dm(id,message) {
+    let recipient = await client.fetchUser(id);
+        recipient.send(message);
+}
 
-client.on("message", message => {
-    if (message.author.bot) return;
+
+    client.on("message", message => {
+        if (message.author.bot) return;
+        if (!message.content.startsWith(config.prefix)) return;
+        sql.get(`SELECT * FROM bannedusers WHERE discordid = "${message.author.id}"`).then(row => {
+            if (row) {
+                content = "Ignored a message by `" + message.author.tag + "`"; 
+                console.log(content);
+                dm(config.ownerID,content);
+                return;
+            } else {
+                const args = message.content.slice(config.prefix.length).trim().split(/ +/g);
+                const command = args.shift().toLowerCase();
+                try {
+                    try {
+                        let commandFile = require(`./commands/${command}.js`);
+                    } catch (err) {
+                        console.log(err);
+                        reporterror(err,message.content,message.author.tag);
+                        return;
+                    }
+                    let commandFile = require(`./commands/${command}.js`);
+                    commandFile.run(client, message, args, config, request, MojangAPI, hypixelfunctions, snekfetch, url, statistics);
+                } catch (err) {
+                    console.log(err);
+                    reporterror(err,message.content,message.author.tag);
+                    return;
+                }
+            };
+        }).catch((e) => {
+                console.log(e);
+                console.log("if there was an error");
+                sql.run("CREATE TABLE IF NOT EXISTS bannedusers (discordid TEXT)").then(() => {
+                        message.channel.send("Try again!");
+                    }
+    
+                );
+        });
+    });
+    
+            //sql.run("INSERT INTO discord (discordid) VALUES (?)", [message.author.id]);
 /*    sql.get(`SELECT * FROM discord WHERE discordid = "${message.author.id}"`).then(row => {
         if (!row) {
                 if(message.content.startsWith(config.prefix)) return;
@@ -46,33 +83,14 @@ client.on("message", message => {
           console.log("if there was an error");
         sql.run("CREATE TABLE IF NOT EXISTS discord (discordid TEXT, prefix TEXT)").then(() => {
             sql.run("INSERT INTO discord (discordid) VALUES (?)", [message.author.id]);  */
-            if(!message.content.startsWith(config.prefix)) return;
-/*      });
-  });  */
+            
 
-// This is the best way to define args. Trust me.
-const args = message.content.slice(config.prefix.length).trim().split(/ +/g);
-const command = args.shift().toLowerCase();
-
-// The list of if/else is replaced with those simple 2 lines:
-try {
-    try {
-    let commandFile = require(`./commands/${command}.js`);
-    } catch (err) {
-        return;
-    }
-    let commandFile = require(`./commands/${command}.js`);    
-commandFile.run(client, message, args, config, request, MojangAPI, hypixelfunctions, snekfetch, url, statistics);
-} catch (err) {
-    console.log(err);
-}
-});
 
 client.on("ready", () => {
     console.log("Logged in!");
     let setStatus = setInterval(function () {
-        var names = [`Serving ${client.guilds.size} different servers!`,'Try !help',`Serving ${client.users.size} users!`];
+        var names = [`${client.guilds.size} different servers!`,'for !help',`${client.users.size} users!`];
         var game = names[Math.floor(Math.random() * names.length)];
-       client.user.setGame(game);
+       client.user.setActivity(game,{ type: 'WATCHING' });
       }, 30000)
 });

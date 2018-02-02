@@ -6,7 +6,7 @@ exports.run = (client, message, args) => {
     if(!args[0]) {
         message.reply("To make a suggestion, do `!suggest [put suggestion here]`")
     } else {
-        botowner.send(message.content.slice(8) + " Suggestion sent by" + message.author.tag);
+        botowner.send("```" + message.content.slice(8) + "```" + " Suggestion sent by ```" + message.author.tag + "```");
         message.reply("Your suggestion has been recorded, thank you for giving us your input!");
     }
     }
