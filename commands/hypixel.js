@@ -8,6 +8,7 @@ sql.open("./db/data.sqlite");
 
 
 exports.run = (client, message, args, Discord,) => {
+    sql.run("CREATE TABLE IF NOT EXISTS hypixel (discordid TEXT, uuid TEXT)");
     function commandtype(game) {
         switch (game) {
             case "guild":
