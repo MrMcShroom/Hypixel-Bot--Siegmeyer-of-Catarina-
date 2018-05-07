@@ -3,6 +3,8 @@ sql.open("./db/data.sqlite");
 const config = require('../config.json');
 
 exports.run = (client, message, args) => {
+    try {
+        console.log("This is the blockuser file.");
     if(message.author.id === config.ownerID) {
     sql.get(`SELECT * FROM bannedusers WHERE discordid = "${args[0]}"`).then(row => {
         if (!row) {
@@ -13,6 +15,9 @@ exports.run = (client, message, args) => {
             }
         });
 } else {
-    message.channel.send("You do not have permission to do this!")
+    message.channel.send("You do not have permission to do this! You need to be MrMcShroom, or one of his close friends :)")
 }
+    } catch(e) {
+        console.log(e);
+    }
 }

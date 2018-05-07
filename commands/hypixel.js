@@ -4,11 +4,19 @@ const statistics = require('../statistics.js');
 const config = require('../config.json');
 const MojangAPI = require('mojang-api');
 const sql = require("sqlite");
+const Discord = require("discord.js");
 sql.open("./db/data.sqlite");
 
+function statisticallogging(uuid,level,fkdr,wlr) {
+    sql.get(`SELECT * FROM hypixel WHERE uuid ="${uuid}"`).then(row => {
+        if (!row) sql.run("INSERT INTO hypixel (uuid,level,fkdr,wlr) VALUES (?,?,?,?)", [uuid,level,fkdr,wlr]) 
+        sql.run(`UPDATE hypixel SET level ="${level}" WHERE uuid ="${uuid}"`);
+        sql.run(`UPDATE hypixel SET fkdr ="${fkdr}" WHERE uuid ="${uuid}"`);
+        sql.run(`UPDATE hypixel SET wlr ="${wlr}" WHERE uuid ="${uuid}"`);
+      });
+}
 
-exports.run = (client, message, args, Discord,) => {
-    sql.run("CREATE TABLE IF NOT EXISTS hypixel (discordid TEXT, uuid TEXT)");
+exports.run = (client, message, args) => {
     function commandtype(game) {
         switch (game) {
             case "guild":
@@ -25,6 +33,7 @@ exports.run = (client, message, args, Discord,) => {
             return "player";
         }
     }
+    var colors = ["0x67037b","0xff2492","0x1e90ff","0xc71585","0x7fff00","0xdc143c","0x48d1cc","0x9932cc"]
     let game = args[0];
     const doesneeduuid = commandtype(game);
     try {
@@ -36,14 +45,18 @@ exports.run = (client, message, args, Discord,) => {
     var date = new Date();
     let uuid = hypixelfunctions.validateUUID(username);
     console.log("Attempting to display " + username + "'s " + game + " info. Message sent by " + message.author.tag);
+    var embed = new Discord.RichEmbed();
+    embed.setTitle("Loading the requested stats!")
+    .setDescription("Be patient, the Hypixel API is working hard :)")
+    .setColor(colors[Math.floor(Math.random() * colors.length)])
+    .setThumbnail("https://i.imgur.com/Den5IAV.png")
+    .setFooter("Loading stats with love from the Hypixel API.", message.client.user.avatarURL)
     function requestguildid(guildid) {
-        console.log("https://api.hypixel.net/guild?key=" + config.hypixelkey + "&id=" + guildid);
         if(typeof guildid === 'string') {
             request.get("https://api.hypixel.net/guild?key=" + config.hypixelkey + "&id=" + guildid, function(e, res, data) {
                 if(!e) {
                   if (res && res.statusCode === 200) {
                       data = JSON.parse(data);
-                      console.log(data.success);
                     if(data.guild) {
                         statistics.guilddata(data,message,uuid);
                     } else {
@@ -106,17 +119,21 @@ exports.run = (client, message, args, Discord,) => {
         }
     }
     function BOROP(e, res, data) {
+        message.channel.send({embed:embed}).then((oldembed) => {
         if(!e) {
             if (res && res.statusCode === 200) {
-                var data = JSON.parse(data);
-                if(!data) {
+                let parseddata = JSON.parse(data);
+                if(!parseddata) {
                     message.channel.send("This user has no stats! Try `!hypixel help`!");
                 } else {
                     switch (game) {
                         case "bedwars":
                         case "bw":
                             try {
-                                statistics.bedwars(data,message,uuid);
+                                var wlratio = parseddata.player.stats.Bedwars.wins_bedwars / parseddata.player.stats.Bedwars.losses_bedwars;
+                                var kdratio = parseddata.player.stats.Bedwars.final_kills_bedwars / parseddata.player.stats.Bedwars.final_deaths_bedwars;
+                                statistics.bedwars(parseddata,message,uuid,oldembed);
+                                statisticallogging(uuid,parseddata.player.achievements.bedwars_level,kdratio,wlratio);
                             }
                             catch(err) {
                                 message.channel.send("This player has no BedWars stats! Try `!hypixel help`!");
@@ -128,7 +145,7 @@ exports.run = (client, message, args, Discord,) => {
                         case "general":
                         case "p":
                             try {
-                                statistics.profile(data,message,uuid);
+                                statistics.profile(parseddata,message,uuid,oldembed);
                             }
                             catch(err) {
                                 message.channel.send("This player has no profile! Try `!hypixel help`!");
@@ -139,7 +156,7 @@ exports.run = (client, message, args, Discord,) => {
                         case "skywars":
                         case "sky-wars":
                             try {
-                                statistics.skywars(data,message,uuid);
+                                statistics.skywars(parseddata,message,uuid,oldembed);
                             }
                             catch(err) {
                                 message.channel.send("This player has no SkyWars stats! Try `!hypixel help`!");
@@ -150,7 +167,7 @@ exports.run = (client, message, args, Discord,) => {
                         case "hungergames":
                         case "blitzsurvivalgames":
                             try {
-                                statistics.hungergames(data,message,uuid);
+                                statistics.hungergames(parseddata,message,uuid,oldembed);
                             }
                             catch(err) {
                                 message.channel.send("This player has no Blitz Survival Games stats! Try `!hypixel help`!");
@@ -161,7 +178,7 @@ exports.run = (client, message, args, Discord,) => {
                         case "uhcc":
                         case "hardcorechampions":
                             try {
-                                statistics.uhc(data,message,uuid);
+                                statistics.uhc(parseddata,message,uuid,oldembed);
                             }
                             catch(err) {
                                 message.channel.send("This player has no UHCC stats! Try `!hypixel help`!");
@@ -172,7 +189,7 @@ exports.run = (client, message, args, Discord,) => {
                         case "skyclash":
                         case "sky-clash":
                             try {
-                                statistics.skyclash(data,message,uuid);
+                                statistics.skyclash(parseddata,message,uuid,oldembed);
                             }
                             catch(err) {
                                 message.channel.send("This player has no SkyClash stats! Try `!hypixel help`!");
@@ -183,7 +200,7 @@ exports.run = (client, message, args, Discord,) => {
                         case "megawalls":
                         case "mega-walls":
                             try {
-                                statistics.megawalls(data,message,uuid);
+                                statistics.megawalls(parseddata,message,uuid,oldembed);
                             }
                             catch(err) {
                                 message.channel.send("This player has no MegaWalls stats! Try `!hypixel help`!");
@@ -194,7 +211,7 @@ exports.run = (client, message, args, Discord,) => {
                         case "sh":
                         case "smash-heroes":
                             try {
-                                statistics.smashheroes(data,message,uuid);
+                                statistics.smashheroes(parseddata,message,uuid,oldembed);
                             }
                             catch(err) {
                                 message.channel.send("This player has no Smash Heroes stats! Try `!hypixel help`!");
@@ -205,7 +222,7 @@ exports.run = (client, message, args, Discord,) => {
                         case "mm":
                         case "murder-mystery":
                             try {
-                                statistics.murdermystery(data,message,uuid);
+                                statistics.murdermystery(parseddata,message,uuid,oldembed);
                             }
                             catch(err) {
                                 message.channel.send("This player has no MurderMystery stats! Try `!hypixel help`!");
@@ -217,7 +234,7 @@ exports.run = (client, message, args, Discord,) => {
                         case "war-lords":
                         case "warlord":
                             try {
-                                statistics.warlords(data,message,uuid);
+                                statistics.warlords(parseddata,message,uuid,oldembed);
                             }
                             catch(err) {
                                 message.channel.send("This player has no Warlords stats! Try `!hypixel help`!");
@@ -230,18 +247,17 @@ exports.run = (client, message, args, Discord,) => {
                         case "quake-craft":
                         case "quake":
                             try {
-                                statistics.quakecraft(data,message,uuid);
+                                statistics.quakecraft(parseddata,message,uuid,oldembed);
                             }
                             catch(err) {
                                 message.channel.send("This player has no QuakeCraft stats! Try `!hypixel help`!");
                                 console.log(err);
                             }
                         break;
-                        break;
                         case "duels":
                         case "d":
                             try {
-                                statistics.duels(data,message,uuid);
+                                statistics.duels(parseddata,message,uuid,oldembed);
                             }
                             catch(err) {
                                 message.channel.send("This player has no Duels stats! Try `!hypixel help`!");
@@ -254,22 +270,13 @@ exports.run = (client, message, args, Discord,) => {
                         case "battlebuild":
                         case "":
                             try {
-                                statistics.buildbattle(data,message,uuid);
+                                statistics.buildbattle(parseddata,message,uuid,oldembed);
                             }
                             catch(err) {
                                 message.channel.send("This player has no Build Battle stats! Try `!hypixel help`!");
                                 console.log(err);
                             }
                         break;
-                        case "help":
-                        try {
-                            statistics.help(message);
-                        }
-                        catch(err) {
-                            message.channel.send("There was an error, sorry! Try `!hypixel help`!");
-                            console.log(err);
-                        }
-                break;
                     }
                 }
             } else {
@@ -279,6 +286,7 @@ exports.run = (client, message, args, Discord,) => {
             console.error("Error: " + e.toString());
             message.channel.send("There was some sort of error. Sorry! Try `!hypixel help`!")
         }
+    });
     }
     function guildorstats(game,username,uuid) {
         var requesttype;
@@ -294,7 +302,6 @@ exports.run = (client, message, args, Discord,) => {
                     }
                 requesttype = "&byName=";
                 parameter = username;
-                console.log("Type: " + requesttype + " Parameter: " + parameter);
                 break;
                 case "guildof":
                 case "playerguild":
@@ -316,42 +323,42 @@ exports.run = (client, message, args, Discord,) => {
             console.log("https://api.hypixel.net/player?key=" + config.hypixelkey + "&uuid=" + uuid)            
         }
     }
-    if (!username || !game) {
-        if(game === "help") {
-               return statistics.help(message);
-        }
-         if (!args[1] && args[0]) {
-            sql.get(`SELECT * FROM hypixel WHERE discordid ="${message.author.id}"`).then(row => {
-              if (!row || !row.uuid) return message.reply("If you want to pull your own stats by not supplying a user, you need to link your discord! `!hypixelverify`");
-              uuid = row.uuid;
-              guildorstats(game,username,uuid);
-              console.log("This hypixel command lacked a username argument. Attempting to pull stats for " + message.author.id);
-            });
-        } else {
-            message.channel.send("Try it like this! `!hypixel [gametype] [username]` :) Or try `!hypixel help`!");
-        }
-    } else {
-        if (message.mentions.users.first()) {
-            sql.get(`SELECT * FROM hypixel WHERE discordid ="${message.mentions.users.first().id}"`).then(row => {
-                if (!row || !row.uuid) return message.reply("This user has not linked their Minecraft account! Try `!hypixel help`!");
-                uuid = row.uuid;
-                guildorstats(game,username,uuid);
-                console.log("This was command used a discord mention");
-              });
+        if (!username || !game) {
+            if(game === "help") {
+                   return statistics.help(message);
             }
-         else if(!uuid && doesneeduuid === "player") {
-            MojangAPI.uuidAt(username, date, (err, res) => {
-                if (err) {
-                    console.log(err);
-                    message.channel.send("There was an error, or that account/UIID doesn't exist! Try `!hypixel help`!");
-                } else {
-                    uuid = res.id;
-                    guildorstats(game,username,uuid);
-                }
-            });
+             if (!args[1] && args[0]) {
+                sql.get(`SELECT * FROM hypixel WHERE discordid ="${message.author.id}"`).then(row => {
+                  if (!row || !row.uuid) return message.reply("If you want to pull your own stats by not supplying a user, you need to link your discord! `!hypixelverify`");
+                  uuid = row.uuid;
+                  guildorstats(game,username,uuid);
+                  console.log("This hypixel command lacked a username argument. Attempting to pull stats for " + message.author.id);
+                });
+            } else {
+                message.channel.send("Try it like this! `!hypixel [gametype] [username]` :) Or try `!hypixel help`!");
+            }
         } else {
-            guildorstats(game,username,uuid);
+            if (message.mentions.users.first()) {
+                sql.get(`SELECT * FROM hypixel WHERE discordid ="${message.mentions.users.first().id}"`).then(row => {
+                    if (!row || !row.uuid) return message.reply("This user has not linked their Minecraft account! Try `!hypixel help`!");
+                    uuid = row.uuid;
+                    guildorstats(game,username,uuid);
+                    console.log("This was command used a discord mention");
+                  });
+                }
+             else if(!uuid && doesneeduuid === "player") {
+                MojangAPI.uuidAt(username, date, (err, res) => {
+                    if (err) {
+                        console.log(err);
+                        message.channel.send("There was an error, or that account/UIID doesn't exist! Try `!hypixel help`!");
+                    } else {
+                        uuid = res.id;
+                        guildorstats(game,username,uuid);
+                    }
+                });
+            } else {
+                guildorstats(game,username,uuid);
+            }
         }
-    }
-
+    
 }

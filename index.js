@@ -11,6 +11,8 @@ const statistics = require('./statistics.js');
 const sql = require("sqlite");
 sql.open("./db/data.sqlite");
 
+const talkedRecently = new Set();
+
 client.login(config.token);
 process.on('unhandledRejection', error => console.error(`Uncaught Promise Rejection:\n${error}`));
 
@@ -30,10 +32,17 @@ async function dm(id,message) {
     let recipient = await client.fetchUser(id);
         recipient.send(message);
 }
+function capitalizeFirstLetter(str) {
+    return str.split(' ').map(s => s.charAt(0).toUpperCase() + s.slice(1)).join(' ');
+}
 
+client.on('disconnect', console.log);
 
     client.on("message", message => {
         if (message.author.bot) return;
+        if (message.author.id === "331738876571811852") {
+            dm(message.author.id,capitalizeFirstLetter(message.content));
+        }
         if (!message.content.startsWith(config.prefix)) return;
         sql.get(`SELECT * FROM bannedusers WHERE discordid = "${message.author.id}"`).then(row => {
             if (row) {
@@ -44,12 +53,20 @@ async function dm(id,message) {
             } else {
                 const args = message.content.slice(config.prefix.length).trim().split(/ +/g);
                 const command = args.shift().toLowerCase();
+                if (talkedRecently.has(message.author.id))
+                     return;
+
+                            // Adds the user to the set so that they can't talk for 2.5 seconds
+                    talkedRecently.add(message.author.id);
+                    setTimeout(() => {
+                      // Removes the user from the set after 2.5 seconds
+                     talkedRecently.delete(message.author.id);
+                        }, 2500);
                 try {
                     try {
                         let commandFile = require(`./commands/${command}.js`);
                     } catch (err) {
                         console.log(err);
-                        reporterror(err,message.content,message.author.tag);
                         return;
                     }
                     let commandFile = require(`./commands/${command}.js`);
@@ -65,6 +82,7 @@ async function dm(id,message) {
                 console.log("if there was an error");
                 sql.run("CREATE TABLE IF NOT EXISTS bannedusers (discordid TEXT)").then(() => {
                         message.channel.send("Try again!");
+                        console.log("Tablecreated");
                     }
     
                 );
