@@ -21,11 +21,11 @@ sqlite
 Install these into the directory where you store the bot. Then create a folder called 'db'
 
 Edit the example config, rename it 'config' and replace the needed json values with API keys. Only required keys are Hypixel API key and googl shortening API key.
+NOTE: Sometime around May, google will be shutting down its URL shortener and changing to a different system. I do not know when I will be updating the code to account for this, because those who already have hteir API Keys won't be cut off. If you really need it, contact me and I will see to it.
 
 ## Purpose
 
 This bot was created to help manage the 1000+ members of the PB2 community, along with give an easy access way for people to pull statistics from PB2 and the Hypixel Network on Discord.
-You can read a full rundown of commands and uses on our website, http://mcshroom.com/bot
 
 ## Contributing
 
