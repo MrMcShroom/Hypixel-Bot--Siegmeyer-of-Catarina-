@@ -1,10 +1,12 @@
 # Hypixel-Bot--Siegmeyer-of-Catarina-
 The discord bot for Hypixel and PB2, created by Eric Engel II
 
-## Getting Started
+## A small note.
+This discord bot runs on the now defunct discord.jsv11
+Bots now use v12, and we're expecting v13 soon.
+Meaning this bot WILL NOT WORK. It is only for a learning reference for others.
 
-If you're only interested in using the bot as I run it, you can do that by visiting our website, http://mcshroom.com/bot 
-Otherwise, keep reading here to set it up on your own.
+
 
 ### Dependencies
 
@@ -29,7 +31,7 @@ This bot was created to help manage the 1000+ members of the PB2 community, alon
 
 ## Contributing
 
-I'm always open to working with other developers. Feel free to email me at mrmcshroom@gmail.com or discord me at MrMcShroom#1337 .
+I'm always open to working with other developers. Feel free to email me at mrmcshroom@gmail.com or discord me at MrMcShroom#4652 .
 
 ## Authors
 
@@ -38,7 +40,7 @@ Eric Engel II
 ## Licensing 
 
 This bot is licensed under the MIT license.
-Copyright (c) 2018 Eric Engel II
+Copyright (c) 2018-21 Eric Engel II
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
